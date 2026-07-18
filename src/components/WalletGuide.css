@@ -1,0 +1,84 @@
+.guide-container {
+  padding: 24px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.guide-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.guide-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.guide-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.guide-header p {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+.wallet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.wallet-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.15s;
+}
+
+.wallet-item:last-child {
+  border-bottom: none;
+}
+
+.wallet-item:active {
+  background: #f8f8f8;
+}
+
+.wallet-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 12px;
+  background: #f5f5f5;
+}
+
+.wallet-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.wallet-arrow {
+  font-size: 20px;
+  color: #ccc;
+  line-height: 1;
+}
+
+.guide-tip {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  margin: 0;
+}

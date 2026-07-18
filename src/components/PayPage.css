@@ -228,7 +228,12 @@
   font-family: monospace;
 }
 
-/* 底部提示 */
+.pay-sending-sub {
+  font-size: 12px;
+  color: #aaa;
+  margin: 0;
+}
+
 .pay-footer-tip {
   font-size: 11px;
   color: #ccc;

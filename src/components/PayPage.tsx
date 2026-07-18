@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useAppKitAccount, useAppKit, useAppKitProvider } from '@reown/appkit/react'
+import { useAppKitAccount, useAppKit } from '@reown/appkit/react'
 import { callAppBridge } from '../utils/jsbridge'
 import { parsePayParams, isUSDT, USDT_CONTRACT, type PayParams } from '../utils/params'
 import WalletGuide from './WalletGuide'
@@ -19,7 +19,6 @@ export default function PayPage() {
   const [walletInjected, setWalletInjected] = useState(false)
 
   const { address, isConnected } = useAppKitAccount()
-  const { walletProvider } = useAppKitProvider('tron')
   const { open } = useAppKit()
 
   // 解析 URL 参数
@@ -51,17 +50,17 @@ export default function PayPage() {
     setErrMsg('')
 
     try {
-      // 优先用 AppKit provider（走 AppKit 签名流程，能弹出钱包确认框）
-      // fallback 到 window.tronWeb（钱包内置浏览器直接注入的场景）
-      const tronWeb = (walletProvider as TronWebAny) ?? (window.tronWeb as TronWebAny)
+      // 必须用 window.tronWeb —— 它是钱包注入的完整实例，包含 contract()/trx.sign() 等方法
+      // walletProvider 是 AppKit 的封装对象，不具备完整 tronWeb API
+      const tronWeb = window.tronWeb as TronWebAny
       if (!tronWeb) throw new Error('未检测到 TronWeb，请在钱包内置浏览器中打开')
+      if (!tronWeb.ready) throw new Error('钱包尚未就绪，请先在 TronLink 中授权')
 
       let hash = ''
 
       if (isUSDT(payParams.currency)) {
-        // USDT TRC20 转账（合约调用）
+        // USDT TRC20 合约转账，.send() 会自动触发钱包签名弹窗
         const contract = await tronWeb.contract().at(USDT_CONTRACT)
-        // USDT 精度为 6 位
         const amountUnit = BigInt(Math.round(parseFloat(payParams.amount) * 1_000_000)).toString()
         hash = await contract.transfer(payParams.toAddress, amountUnit).send()
       } else {
@@ -72,6 +71,7 @@ export default function PayPage() {
           amountSun,
           address
         )
+        // .sign() 会触发钱包签名弹窗
         const signedTx = await tronWeb.trx.sign(tx)
         const result = await tronWeb.trx.sendRawTransaction(signedTx)
         if (!result.result) throw new Error('广播交易失败')
@@ -83,8 +83,8 @@ export default function PayPage() {
       callAppBridge({ hash, status: 'success' })
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err)
-      // 用户主动拒绝不算错误，回到确认页
-      if (message.toLowerCase().includes('reject') || message.includes('cancel') || message.includes('denied')) {
+      // 用户主动拒绝/取消，回到确认页不报错
+      if (/reject|cancel|denied|user/i.test(message)) {
         setStep('confirm')
         return
       }

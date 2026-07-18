@@ -1,44 +1,46 @@
 import './WalletGuide.css'
 
+type WalletId = 'tronlink' | 'okx' | 'bitget' | 'tokenpocket'
+
 interface WalletInfo {
+  id: WalletId
   name: string
   icon: string
-  deepLink: string
   storeUrl: { ios: string; android: string }
 }
 
 const WALLETS: WalletInfo[] = [
   {
+    id: 'tronlink',
     name: 'TronLink',
     icon: 'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=TronLink%20crypto%20wallet%20app%20icon%20red%20gradient%20clean%20minimal&image_size=square_hd',
-    deepLink: 'tronlinkoutside://pull.activity?param=',
     storeUrl: {
       ios: 'https://apps.apple.com/app/tronlink/id1453530188',
       android: 'https://play.google.com/store/apps/details?id=com.tronlinkpro.wallet',
     },
   },
   {
+    id: 'okx',
     name: 'OKX Wallet',
     icon: 'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=OKX%20crypto%20exchange%20wallet%20app%20icon%20black%20minimal%20clean&image_size=square_hd',
-    deepLink: 'okx://wallet/dapp/url?dappUrl=',
     storeUrl: {
       ios: 'https://apps.apple.com/app/okx/id1327268470',
       android: 'https://play.google.com/store/apps/details?id=com.okinc.okex.gp',
     },
   },
   {
+    id: 'bitget',
     name: 'Bitget Wallet',
     icon: 'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Bitget%20crypto%20wallet%20app%20icon%20blue%20gradient%20minimal%20clean&image_size=square_hd',
-    deepLink: 'bitkeep://dapp?url=',
     storeUrl: {
       ios: 'https://apps.apple.com/app/bitget-wallet/id1395301115',
       android: 'https://play.google.com/store/apps/details?id=com.bitkeep.wallet',
     },
   },
   {
+    id: 'tokenpocket',
     name: 'TokenPocket',
     icon: 'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=TokenPocket%20crypto%20wallet%20app%20icon%20blue%20circle%20minimal&image_size=square_hd',
-    deepLink: 'tpoutside://pull.activity?param=',
     storeUrl: {
       ios: 'https://apps.apple.com/app/tp-global-wallet/id1436028697',
       android: 'https://play.google.com/store/apps/details?id=vip.mytokenpocket',
@@ -52,14 +54,42 @@ function getStoreLink(wallet: WalletInfo): string {
   return wallet.storeUrl.android
 }
 
-function openInWallet(wallet: WalletInfo): void {
-  const currentUrl = encodeURIComponent(window.location.href)
-  const deepLink = wallet.deepLink + currentUrl
+// 构造各钱包的 DeepLink
+function buildDeepLink(wallet: WalletInfo): string {
+  const dappUrl = window.location.href
 
-  // 尝试 DeepLink 跳转，失败则跳商店
+  switch (wallet.id) {
+    case 'tronlink': {
+      // TronLink 要求：base64(JSON) 作为 param 值
+      // JSON 格式：{"action":"open","url":"..."}
+      const payload = JSON.stringify({ action: 'open', url: dappUrl })
+      const base64 = btoa(unescape(encodeURIComponent(payload)))
+      return `tronlinkoutside://pull.activity?param=${encodeURIComponent(base64)}`
+    }
+    case 'okx':
+      // OKX 直接 encodeURIComponent URL
+      return `okx://wallet/dapp/url?dappUrl=${encodeURIComponent(dappUrl)}`
+    case 'bitget':
+      // Bitget 直接 encodeURIComponent URL
+      return `bitkeep://dapp?url=${encodeURIComponent(dappUrl)}`
+    case 'tokenpocket': {
+      // TokenPocket 同 TronLink，base64(JSON)
+      const payload = JSON.stringify({ action: 'open', url: dappUrl, protocol: 'TRON' })
+      const base64 = btoa(unescape(encodeURIComponent(payload)))
+      return `tpoutside://pull.activity?param=${encodeURIComponent(base64)}`
+    }
+    default:
+      return ''
+  }
+}
+
+function openInWallet(wallet: WalletInfo): void {
+  const deepLink = buildDeepLink(wallet)
+  if (!deepLink) return
+
   window.location.href = deepLink
 
-  // 延迟检测是否跳转成功，若未成功则引导去下载
+  // 延迟检测：若未跳走（App 未安装），引导去下载
   setTimeout(() => {
     if (!document.hidden) {
       window.open(getStoreLink(wallet), '_blank')

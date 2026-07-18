@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { parsePayParams, isUSDT, USDT_CONTRACT } from '../utils/params'
-import { callAppBridge } from '../utils/jsbridge'
 import './DeepLinkTest.css'
+
+import { useEffect, useRef, useState } from 'react'
+
+import { callAppBridge } from '../utils/jsbridge'
+import { isTronUSDT as isUSDT, parsePayParams, USDT_TRC20 as USDT_CONTRACT } from '../utils/params'
 
 // TronLink 主网 chainId
 const TRON_CHAIN_ID = '0x2b6653dc'

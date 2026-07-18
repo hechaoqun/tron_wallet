@@ -5,7 +5,6 @@ import { parseEther, parseUnits, erc20Abi } from 'viem'
 import { mainnet, bsc } from '@reown/appkit/networks'
 import { callAppBridge } from '../utils/jsbridge'
 import { isEvmNative, isEvmToken, getEvmContract, type PayParams } from '../utils/params'
-import WalletGuide from './WalletGuide'
 import './PayPage.css'
 
 // AppKit 网络的 chainId（number）
@@ -31,11 +30,9 @@ interface Props {
 }
 
 export default function EvmTransfer({ payParams }: Props) {
-  // ── 所有 hooks 必须无条件放在最前面 ──────────────────────────
   const [step, setStep] = useState<Step>('connect')
   const [txHash, setTxHash] = useState('')
   const [errMsg, setErrMsg] = useState('')
-  const [evmInjected, setEvmInjected] = useState(false)
 
   const { address, isConnected } = useAppKitAccount()
   const { caipNetwork, switchNetwork } = useAppKitNetwork()
@@ -44,15 +41,6 @@ export default function EvmTransfer({ payParams }: Props) {
   const { sendTransactionAsync } = useSendTransaction()
   const { writeContractAsync } = useWriteContract()
 
-  // 检测 window.ethereum 注入
-  useEffect(() => {
-    const check = () => setEvmInjected(!!(window as { ethereum?: unknown }).ethereum)
-    check()
-    const t = setTimeout(check, 1500)
-    return () => clearTimeout(t)
-  }, [])
-
-  // 根据连接/网络状态推进步骤
   const targetChainId = CHAIN_ID_MAP[payParams.network]
   const isCorrectNetwork = (caipNetwork?.id as number | undefined) === targetChainId
 
@@ -65,11 +53,6 @@ export default function EvmTransfer({ payParams }: Props) {
       setStep(prev => (prev === 'connect' || prev === 'switch') ? 'confirm' : prev)
     }
   }, [isConnected, isCorrectNetwork])
-
-  // ── 条件渲染（不影响 hook 调用顺序）────────────────────────
-  if (!evmInjected && !isConnected) {
-    return <WalletGuide network="evm" />
-  }
 
   const networkLabel = NETWORK_LABEL[payParams.network] ?? payParams.network.toUpperCase()
   const explorer = EXPLORER_MAP[payParams.network] ?? 'https://etherscan.io/tx'
@@ -136,8 +119,8 @@ export default function EvmTransfer({ payParams }: Props) {
     <div>
       {step === 'connect' && (
         <div className="pay-step">
-          <p className="pay-step-desc">请先连接 EVM 钱包</p>
-          <button className="pay-btn" onClick={() => open()}>连接钱包</button>
+          <p className="pay-step-desc">支持 MetaMask、OKX、Trust Wallet 等，也可扫码连接</p>
+          <button className="pay-btn" onClick={() => open({ view: 'Connect' })}>连接钱包</button>
         </div>
       )}
 

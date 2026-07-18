@@ -42,11 +42,14 @@ const metadata = {
 export const modal = createAppKit({
   adapters: [tronAdapter, wagmiAdapter],
   networks: [tronMainnet, mainnet, bsc],
+  defaultNetwork: mainnet,  // EVM 为默认，Tron 页面会通过 switchNetwork 切换
   projectId,
   metadata,
   features: {
     analytics: false,
     email: false,
     socials: [],
+    swaps: false,
+    onramp: false,
   },
 })

@@ -99,9 +99,20 @@ export default function PayPage() {
         setStep('confirm')
         return
       }
-      setErrMsg(message)
+      // 转化常见链上错误为中文提示
+      let friendlyMsg = message
+      if (/failed to create transaction/i.test(message)) {
+        friendlyMsg = '交易创建失败：账户 TRX 余额或 Energy 不足，USDT 转账约需 13-15 TRX 手续费'
+      } else if (/insufficient balance/i.test(message)) {
+        friendlyMsg = '余额不足，请检查账户 TRX / USDT 余额'
+      } else if (/account not exist/i.test(message)) {
+        friendlyMsg = '收款地址不存在，首次收款需要激活账户（约 1 TRX）'
+      } else if (/bandwidth/i.test(message)) {
+        friendlyMsg = 'Bandwidth 不足，请确保账户有足够 TRX'
+      }
+      setErrMsg(friendlyMsg)
       setStep('error')
-      callAppBridge({ hash: '', status: 'failed', error: message })
+      callAppBridge({ hash: '', status: 'failed', error: friendlyMsg })
     }
   }
 

@@ -1,15 +1,27 @@
 import { useEffect, useState } from 'react'
-import { useAppKitAccount, useAppKit } from '@reown/appkit/react'
+import { useAppKitAccount, useAppKit, useAppKitProvider } from '@reown/appkit/react'
+import type { TronConnector } from '@reown/appkit-adapter-tron'
 import { callAppBridge } from '../utils/jsbridge'
 import { parsePayParams, isUSDT, USDT_CONTRACT, type PayParams } from '../utils/params'
 import WalletGuide from './WalletGuide'
 import './PayPage.css'
 
-// 使用 any 避免与 tronwallet-adapter 内部类型声明冲突
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TronWebAny = any
 
 type Step = 'connect' | 'confirm' | 'sending' | 'done' | 'error'
+
+// 编码 TRC20 transfer(address,uint256) 的 ABI data
+// 函数选择器: a9059cbb
+function encodeTrc20Transfer(toAddress: string, amountHex: string): string {
+  // TronWeb 地址转 hex（去掉 41 前缀后补齐 32 字节）
+  const tronWeb = window.tronWeb as TronWebAny
+  // 将 Base58 地址转为 hex，去掉前两位 "41"，左补齐 64 位
+  const addrHex = tronWeb.address.toHex(toAddress).slice(2).padStart(64, '0')
+  // 金额补齐 64 位 hex
+  const amountPadded = amountHex.replace('0x', '').padStart(64, '0')
+  return '0xa9059cbb' + addrHex + amountPadded
+}
 
 export default function PayPage() {
   const [payParams, setPayParams] = useState<PayParams | null>(null)
@@ -19,6 +31,7 @@ export default function PayPage() {
   const [walletInjected, setWalletInjected] = useState(false)
 
   const { address, isConnected } = useAppKitAccount()
+  const { walletProvider } = useAppKitProvider<TronConnector>('tron')
   const { open } = useAppKit()
 
   // 解析 URL 参数
@@ -45,37 +58,35 @@ export default function PayPage() {
 
   // 发起转账
   async function handleTransfer() {
-    if (!payParams || !address) return
+    if (!payParams || !address || !walletProvider) return
     setStep('sending')
     setErrMsg('')
 
     try {
-      // 必须用 window.tronWeb —— 它是钱包注入的完整实例，包含 contract()/trx.sign() 等方法
-      // walletProvider 是 AppKit 的封装对象，不具备完整 tronWeb API
-      const tronWeb = window.tronWeb as TronWebAny
-      if (!tronWeb) throw new Error('未检测到 TronWeb，请在钱包内置浏览器中打开')
-      if (!tronWeb.ready) throw new Error('钱包尚未就绪，请先在 TronLink 中授权')
-
       let hash = ''
 
       if (isUSDT(payParams.currency)) {
-        // USDT TRC20 合约转账，.send() 会自动触发钱包签名弹窗
-        const contract = await tronWeb.contract().at(USDT_CONTRACT)
-        const amountUnit = BigInt(Math.round(parseFloat(payParams.amount) * 1_000_000)).toString()
-        hash = await contract.transfer(payParams.toAddress, amountUnit).send()
+        // USDT TRC20 转账
+        // 通过 data 字段传入编码的 transfer(address,uint256) 调用
+        const amountInt = BigInt(Math.round(parseFloat(payParams.amount) * 1_000_000))
+        const amountHex = amountInt.toString(16)
+        const data = encodeTrc20Transfer(payParams.toAddress, amountHex)
+
+        hash = await walletProvider.sendTransaction({
+          from: address,
+          to: USDT_CONTRACT,   // 发给合约地址
+          value: '0',          // TRC20 不转 TRX，value 为 0
+          data,                // 编码的合约调用数据
+        })
       } else {
-        // TRX 原生转账
-        const amountSun = Number(tronWeb.toSun(parseFloat(payParams.amount)))
-        const tx = await tronWeb.transactionBuilder.sendTrx(
-          payParams.toAddress,
-          amountSun,
-          address
-        )
-        // .sign() 会触发钱包签名弹窗
-        const signedTx = await tronWeb.trx.sign(tx)
-        const result = await tronWeb.trx.sendRawTransaction(signedTx)
-        if (!result.result) throw new Error('广播交易失败')
-        hash = result.txid
+        // TRX 原生转账，value 单位是 Sun（1 TRX = 1,000,000 Sun）
+        const amountSun = Math.round(parseFloat(payParams.amount) * 1_000_000).toString()
+
+        hash = await walletProvider.sendTransaction({
+          from: address,
+          to: payParams.toAddress,
+          value: amountSun,
+        })
       }
 
       setTxHash(hash)

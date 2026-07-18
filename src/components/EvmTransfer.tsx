@@ -42,7 +42,13 @@ export default function EvmTransfer({ payParams }: Props) {
   const { writeContractAsync } = useWriteContract()
 
   const targetChainId = CHAIN_ID_MAP[payParams.network]
-  const isCorrectNetwork = (caipNetwork?.id as number | undefined) === targetChainId
+  // caipNetwork.id 可能是数字(1/56)也可能是 CAIP 字符串("eip155:1")，统一转 string 比较末段
+  const currentChainId = caipNetwork?.id
+  const isCorrectNetwork = currentChainId !== undefined && (
+    Number(currentChainId) === targetChainId ||
+    String(currentChainId) === String(targetChainId) ||
+    String(currentChainId).endsWith(`:${targetChainId}`)
+  )
 
   useEffect(() => {
     if (!isConnected) {

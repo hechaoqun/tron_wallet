@@ -60,11 +60,15 @@ function buildDeepLink(wallet: WalletInfo): string {
 
   switch (wallet.id) {
     case 'tronlink': {
-      // TronLink 要求：base64(JSON) 作为 param 值
-      // JSON 格式：{"action":"open","url":"..."}
-      const payload = JSON.stringify({ action: 'open', url: dappUrl })
-      const base64 = btoa(unescape(encodeURIComponent(payload)))
-      return `tronlinkoutside://pull.activity?param=${encodeURIComponent(base64)}`
+      // 官方文档：param 是 JSON 字符串直接 URL-encode，不是 Base64
+      // action "open" + url 表示在 TronLink 内置浏览器中打开此 DApp
+      const payload = JSON.stringify({
+        url: dappUrl,
+        action: 'open',
+        protocol: 'TronLink',
+        version: '1.0',
+      })
+      return `tronlinkoutside://pull.activity?param=${encodeURIComponent(payload)}`
     }
     case 'okx':
       // OKX 直接 encodeURIComponent URL
@@ -73,10 +77,14 @@ function buildDeepLink(wallet: WalletInfo): string {
       // Bitget 直接 encodeURIComponent URL
       return `bitkeep://dapp?url=${encodeURIComponent(dappUrl)}`
     case 'tokenpocket': {
-      // TokenPocket 同 TronLink，base64(JSON)
-      const payload = JSON.stringify({ action: 'open', url: dappUrl, protocol: 'TRON' })
-      const base64 = btoa(unescape(encodeURIComponent(payload)))
-      return `tpoutside://pull.activity?param=${encodeURIComponent(base64)}`
+      // TokenPocket 格式与 TronLink 相同，直接 URL-encode JSON
+      const payload = JSON.stringify({
+        url: dappUrl,
+        action: 'open',
+        protocol: 'TRON',
+        version: '1.0',
+      })
+      return `tpoutside://pull.activity?param=${encodeURIComponent(payload)}`
     }
     default:
       return ''

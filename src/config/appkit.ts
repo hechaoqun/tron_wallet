@@ -1,14 +1,14 @@
-import { createAppKit } from '@reown/appkit/react'
 import { TronAdapter } from '@reown/appkit-adapter-tron'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { tronMainnet, mainnet, bsc } from '@reown/appkit/networks'
-import { TronLinkAdapter } from '@tronweb3/tronwallet-adapter-tronlink'
-import { OkxWalletAdapter } from '@tronweb3/tronwallet-adapter-okxwallet'
-import { BitKeepAdapter } from '@tronweb3/tronwallet-adapter-bitkeep'
-import { TokenPocketAdapter } from '@tronweb3/tronwallet-adapter-tokenpocket'
+import { bsc, mainnet, tronMainnet } from '@reown/appkit/networks'
+import { createAppKit } from '@reown/appkit/react'
 import { QueryClient } from '@tanstack/react-query'
+import { BitKeepAdapter } from '@tronweb3/tronwallet-adapter-bitkeep'
+import { OkxWalletAdapter } from '@tronweb3/tronwallet-adapter-okxwallet'
+import { TokenPocketAdapter } from '@tronweb3/tronwallet-adapter-tokenpocket'
+import { TronLinkAdapter } from '@tronweb3/tronwallet-adapter-tronlink'
 
-export const projectId = '9402fd8ff9258d576cfd821f722d16b0'
+export const projectId = 'cf22c64d7835d0879db47264c842a42d'
 
 export const queryClient = new QueryClient()
 
@@ -34,7 +34,7 @@ export const wagmiAdapter = new WagmiAdapter({
 const metadata = {
   name: 'Crypto Recharge',
   description: '加密货币充值转账',
-  url: 'http://localhost:5173',
+  url: 'https://tron-wallet-ten.vercel.app',
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 }
 

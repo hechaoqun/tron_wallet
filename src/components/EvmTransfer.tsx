@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useAppKitAccount, useAppKit, useAppKitNetwork } from '@reown/appkit/react'
+import { useAppKitAccount, useAppKit, useAppKitNetwork, useDisconnect } from '@reown/appkit/react'
 import { useWalletClient, useSendTransaction, useWriteContract } from 'wagmi'
 import { parseEther, parseUnits, erc20Abi } from 'viem'
 import { mainnet, bsc } from '@reown/appkit/networks'
@@ -37,6 +37,7 @@ export default function EvmTransfer({ payParams }: Props) {
   const { address, isConnected } = useAppKitAccount()
   const { caipNetwork, switchNetwork } = useAppKitNetwork()
   const { open } = useAppKit()
+  const { disconnect } = useDisconnect()
   const { data: walletClient } = useWalletClient()
   const { sendTransactionAsync } = useSendTransaction()
   const { writeContractAsync } = useWriteContract()
@@ -127,6 +128,7 @@ export default function EvmTransfer({ payParams }: Props) {
         <div className="pay-step">
           <p className="pay-step-desc">支持 MetaMask、OKX、Trust Wallet 等，也可扫码连接</p>
           <button className="pay-btn" onClick={() => open({ view: 'Connect' })}>连接钱包</button>
+          <button className="pay-btn-outline" onClick={async () => { await disconnect(); open({ view: 'Connect' }) }}>断开并重新连接</button>
         </div>
       )}
 
@@ -135,6 +137,7 @@ export default function EvmTransfer({ payParams }: Props) {
           <p className="pay-step-desc">请切换到 <strong>{networkLabel}</strong> 网络</p>
           <button className="pay-btn" onClick={handleSwitch}>切换到 {networkLabel}</button>
           <button className="pay-btn-outline" onClick={() => open()}>切换钱包</button>
+          <button className="pay-btn-outline" onClick={async () => { await disconnect() }}>断开连接</button>
         </div>
       )}
 

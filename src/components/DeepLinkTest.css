@@ -1,0 +1,280 @@
+.dl-container {
+  min-height: 100vh;
+  background: #f0f4ff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.dl-tag {
+  display: inline-block;
+  background: #722ed1;
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  align-self: flex-start;
+}
+
+.dl-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.dl-card-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dl-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dl-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.dl-currency {
+  font-size: 18px;
+  font-weight: 600;
+  color: #722ed1;
+}
+
+.dl-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-top: 1px solid #f5f5f5;
+  gap: 12px;
+}
+
+.dl-info-label {
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dl-info-value {
+  font-size: 13px;
+  color: #333;
+  word-break: break-all;
+  text-align: right;
+}
+
+.dl-action-id {
+  cursor: pointer;
+  color: #722ed1;
+  position: relative;
+}
+
+.dl-copy-tip {
+  position: absolute;
+  right: 0;
+  top: -22px;
+  background: #333;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.dl-step {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.dl-step.dl-center {
+  align-items: center;
+  text-align: center;
+}
+
+.dl-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.dl-sub {
+  font-size: 12px;
+  color: #aaa;
+  margin: 0;
+}
+
+.dl-btn {
+  width: 100%;
+  padding: 14px;
+  background: #722ed1;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.dl-btn:active {
+  opacity: 0.85;
+}
+
+/* 测试工具区 */
+.dl-mock-box {
+  width: 100%;
+  background: #fafafa;
+  border: 1px dashed #d9b8ff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.dl-mock-label {
+  font-size: 12px;
+  color: #722ed1;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.dl-btn-mock {
+  width: 100%;
+  padding: 10px;
+  background: #f9f0ff;
+  color: #722ed1;
+  border: 1px solid #d3adf7;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.dl-btn-mock:active {
+  background: #efdbff;
+}
+
+.dl-mock-hint {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 6px;
+}
+
+.dl-code {
+  display: block;
+  font-size: 11px;
+  color: #555;
+  background: #f5f5f5;
+  padding: 8px 10px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+.dl-connected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #52c41a;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.dl-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #52c41a;
+  flex-shrink: 0;
+}
+
+.dl-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e8e8e8;
+  border-top-color: #722ed1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dl-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.dl-hash-label {
+  font-size: 12px;
+  color: #999;
+  margin: 8px 0 4px;
+}
+
+.dl-hash {
+  font-size: 12px;
+  color: #555;
+  word-break: break-all;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.dl-link {
+  color: #722ed1;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.dl-error-msg {
+  font-size: 13px;
+  color: #ff4d4f;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  padding: 10px 12px;
+  word-break: break-word;
+  margin: 0;
+  max-width: 100%;
+}
+
+.dl-error-box {
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 24px;
+}
+
+.dl-footer {
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+  margin-top: auto;
+  padding-top: 24px;
+}

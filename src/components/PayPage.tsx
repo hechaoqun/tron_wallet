@@ -1,45 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useAppKitAccount, useAppKitProvider, useAppKit } from '@reown/appkit/react'
+import { useAppKitAccount, useAppKit } from '@reown/appkit/react'
 import { callAppBridge } from '../utils/jsbridge'
 import { parsePayParams, isUSDT, USDT_CONTRACT, type PayParams } from '../utils/params'
 import WalletGuide from './WalletGuide'
 import './PayPage.css'
 
-// TronWeb 类型声明（由钱包注入）
-declare global {
-  interface Window {
-    tronWeb?: {
-      defaultAddress?: { base58?: string }
-      transactionBuilder: {
-        triggerSmartContract: (
-          contractAddress: string,
-          functionSelector: string,
-          options: object,
-          parameters: { type: string; value: unknown }[],
-          issuerAddress: string
-        ) => Promise<{ transaction: unknown; result: { result: boolean } }>
-        sendTrx: (
-          toAddress: string,
-          amount: number,
-          fromAddress: string
-        ) => Promise<unknown>
-      }
-      trx: {
-        sign: (transaction: unknown) => Promise<unknown>
-        sendRawTransaction: (signedTx: unknown) => Promise<{ result: boolean; txid: string }>
-        getBalance: (address: string) => Promise<number>
-      }
-      toSun: (amount: number) => number
-      contract: () => {
-        at: (address: string) => Promise<{
-          transfer: (toAddress: string, amount: string) => { send: () => Promise<string> }
-          balanceOf: (address: string) => { call: () => Promise<bigint> }
-        }>
-      }
-      BigNumber: new (value: string | number) => { toString: () => string }
-    }
-  }
-}
+// 使用 any 避免与 tronwallet-adapter 内部类型声明冲突
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TronWebAny = any
 
 type Step = 'connect' | 'confirm' | 'sending' | 'done' | 'error'
 
@@ -51,7 +19,6 @@ export default function PayPage() {
   const [walletInjected, setWalletInjected] = useState(false)
 
   const { address, isConnected } = useAppKitAccount()
-  const { walletProvider } = useAppKitProvider('tron')
   const { open } = useAppKit()
 
   // 解析 URL 参数
@@ -83,7 +50,7 @@ export default function PayPage() {
     setErrMsg('')
 
     try {
-      const tronWeb = window.tronWeb
+      const tronWeb = window.tronWeb as TronWebAny
       if (!tronWeb) throw new Error('未检测到 TronWeb，请在钱包内置浏览器中打开')
 
       let hash = ''
@@ -96,7 +63,7 @@ export default function PayPage() {
         hash = await contract.transfer(payParams.toAddress, amountSun).send()
       } else {
         // TRX 原生转账
-        const amountSun = tronWeb.toSun(parseFloat(payParams.amount))
+        const amountSun = Number(tronWeb.toSun(parseFloat(payParams.amount)))
         const tx = await tronWeb.transactionBuilder.sendTrx(
           payParams.toAddress,
           amountSun,
